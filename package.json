@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "A personal Git project",
   "main": "index.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "start": "node index.js",
-    "build": "npm install",
     "dev": "nodemon index.js"
   },
   "keywords": [],
