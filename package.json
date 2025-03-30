@@ -1,0 +1,13 @@
+{
+  "name": "latgitproject",
+  "version": "1.0.0",
+  "description": "A personal Git project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"No build step specified yet\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+} 
