@@ -1,9 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 
 // Temporary user storage (replace with database in production)
 const users = {
-    'admin': '$2a$10$XOPbrlUPQdwdJUpSrIF6X.LbE14qsMmKGhM1A8W9E68wLnsMO1Gu.' // password: admin123
+    'admin@example.com': {
+        name: 'Admin User',
+        email: 'admin@example.com',
+        password: '$2a$10$XOPbrlUPQdwdJUpSrIF6X.LbE14qsMmKGhM1A8W9E68wLnsMO1Gu.' // admin123
+    }
 };
 
 // Login page
@@ -12,17 +17,54 @@ router.get('/login', (req, res) => {
 });
 
 // Login handler
-router.post('/login', (req, res) => {
-    const { username, password } = req.body;
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
     
-    // For demo purposes, just check if username exists
-    if (users[username]) {
-        req.session.user = username;
-        res.redirect('/ai-chat');
-    } else {
-        req.flash('error', 'Invalid username or password');
-        res.redirect('/login');
+    const user = users[email];
+    if (!user) {
+        req.flash('error', 'Invalid email or password');
+        return res.redirect('/login');
     }
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+        req.flash('error', 'Invalid email or password');
+        return res.redirect('/login');
+    }
+
+    req.session.user = {
+        email: user.email,
+        name: user.name
+    };
+    res.redirect('/ai-chat');
+});
+
+// Register handler
+router.post('/register', async (req, res) => {
+    const { name, email, password } = req.body;
+
+    // Check if user already exists
+    if (users[email]) {
+        req.flash('error', 'Email already registered');
+        return res.redirect('/login');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Store new user
+    users[email] = {
+        name,
+        email,
+        password: hashedPassword
+    };
+
+    // Auto-login after registration
+    req.session.user = {
+        email,
+        name
+    };
+    res.redirect('/ai-chat');
 });
 
 // Logout handler
